@@ -48,7 +48,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * AbstractBeanDefinitionParser
+ * AbstractBeanDefinitionParser1
  *
  * @author william.liangf
  * @export
