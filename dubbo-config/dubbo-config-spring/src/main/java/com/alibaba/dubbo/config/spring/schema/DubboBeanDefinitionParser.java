@@ -1,12 +1,12 @@
 /*
  * Copyright 1999-2011 Alibaba Group.
- *  
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *  
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,14 +66,29 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
         this.required = required;
     }
 
+    /**
+     * 解析dubbo自定义标签,往BeanDefinition设置属性值,这个时候bean还没有创建
+     *
+     * @param element
+     * @param parserContext
+     * @param beanClass
+     * @param required
+     * @return
+     */
     @SuppressWarnings("unchecked")
     private static BeanDefinition parse(Element element, ParserContext parserContext, Class<?> beanClass, boolean required) {
         RootBeanDefinition beanDefinition = new RootBeanDefinition();
         beanDefinition.setBeanClass(beanClass);
+        //设置懒加载为false，表示立即加载，spring启动时，立刻进行实例化
+        //如果设置为true，那么要第一次向容器通过getBean索取bean时实例化，在spring bean的配置里可以配置
+        //这里会设置懒加载为false其实还可以得到一个推断就是:dubbo标签创建的bean就是单例
+        //因为lazy-init的设置只对singleton bean有效，对原型bean(prototype无效)
         beanDefinition.setLazyInit(false);
+        //如果没有设置bean的id
         String id = element.getAttribute("id");
         if ((id == null || id.length() == 0) && required) {
             String generatedBeanName = element.getAttribute("name");
+            //name没有配置
             if (generatedBeanName == null || generatedBeanName.length() == 0) {
                 if (ProtocolConfig.class.equals(beanClass)) {
                     generatedBeanName = "dubbo";
@@ -81,23 +96,47 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
                     generatedBeanName = element.getAttribute("interface");
                 }
             }
+
+            /*
+             * 如果还为null 那么取 beanClass 的名字，beanClass 其实就是要解析的类型
+             * 如：com.alibaba.dubbo.config.ApplicationConfig
+             */
             if (generatedBeanName == null || generatedBeanName.length() == 0) {
                 generatedBeanName = beanClass.getName();
             }
+            //如果id没有设置那么 id = generatedBeanName,如果是ProtocolConfig类型的话自然就是 dubbo
             id = generatedBeanName;
+
+            /*
+             * 由于spring的bean id不能重复，但有些标签可能会配置多个如：<dubbo:registry
+             * 所以 id 在后面加数字 2、3、4 区分
+             */
             int counter = 2;
             while (parserContext.getRegistry().containsBeanDefinition(id)) {
                 id = generatedBeanName + (counter++);
             }
         }
+
         if (id != null && id.length() > 0) {
+            //检查是否有 bean id 相同的
             if (parserContext.getRegistry().containsBeanDefinition(id)) {
                 throw new IllegalStateException("Duplicate spring bean id " + id);
             }
+
+            /*
+             * 注册 bean 定义
+             * org.springframework.beans.factory.support.DefaultListableBeanFactory#registerBeanDefinition
+             * 会按照 id 即beanName做一些检查,判断是否重载已加载过的bean等等
+             * 跟到代码里其实 bean 的注册也是放到 ConcurrentHashMap 里
+             * beanName也就是这里的 id 会放到 list 里
+             */
             parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
+            //给bean添加属性值
             beanDefinition.getPropertyValues().addPropertyValue("id", id);
         }
-        if (ProtocolConfig.class.equals(beanClass)) {
+
+
+        if (ProtocolConfig.class.equals(beanClass)) {//解析<dubbo:protocol
             for (String name : parserContext.getRegistry().getBeanDefinitionNames()) {
                 BeanDefinition definition = parserContext.getRegistry().getBeanDefinition(name);
                 PropertyValue property = definition.getPropertyValues().getPropertyValue("protocol");
@@ -108,18 +147,35 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
                     }
                 }
             }
-        } else if (ServiceBean.class.equals(beanClass)) {
-            String className = element.getAttribute("class");
+        } else if (ServiceBean.class.equals(beanClass)) {//解析<dubbo:service
+            String className = element.getAttribute("class");//获取类全名
             if (className != null && className.length() > 0) {
                 RootBeanDefinition classDefinition = new RootBeanDefinition();
                 classDefinition.setBeanClass(ReflectUtils.forName(className));
                 classDefinition.setLazyInit(false);
+                   /*
+                    解析子节点，有些配置可能是：
+                    <dubbo:service interface="com.alihealth.dubbo.api.drugInfo.service.DemoService"
+                         executes="10" >
+                        <property  ref="demoService" name="ref"></property>
+                        <property  value="1.0.0" name="version"></property>
+                     </dubbo:service>
+                 */
                 parseProperties(element.getChildNodes(), classDefinition);
+                 /*
+                    ref直接设置成了 接口名 + Impl 的bean ？
+                    如：com.alihealth.dubbo.api.drugInfo.service.DemoService  + Impl 的bean为啥？
+                    那<dubbo:service里定义的 ref 属性有啥用
+
+                    todo by liuhao 直接设置class不设置ref的情况
+                 */
                 beanDefinition.getPropertyValues().addPropertyValue("ref", new BeanDefinitionHolder(classDefinition, id + "Impl"));
             }
-        } else if (ProviderConfig.class.equals(beanClass)) {
+        } else if (ProviderConfig.class.equals(beanClass)) {//解析<dubbo:provider
+            //   <dubbo:provider 为缺省配置 ，所以在解析的时候，如果<dubbo:service有些值没配置，那么会用<dubbo:provider值进行填充
             parseNested(element, parserContext, ServiceBean.class, true, "service", "provider", id, beanDefinition);
         } else if (ConsumerConfig.class.equals(beanClass)) {
+            // 同上
             parseNested(element, parserContext, ReferenceBean.class, false, "reference", "consumer", id, beanDefinition);
         }
         Set<String> props = new HashSet<String>();
@@ -274,6 +330,10 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
                         if (first) {
                             first = false;
                             String isDefault = element.getAttribute("default");
+                               /*
+                                如果 <dubbo:provider 标签没有配置default开关,那么直接设置 default = "false"
+                                这样做的目的是为了让 <dubbo:provider里的配置都只是 <dubbo:service 或 <dubbo:reference的默认或缺省配置
+                             */
                             if (isDefault == null || isDefault.length() == 0) {
                                 beanDefinition.getPropertyValues().addPropertyValue("default", "false");
                             }
