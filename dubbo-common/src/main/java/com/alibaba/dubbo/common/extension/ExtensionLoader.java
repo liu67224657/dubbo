@@ -289,6 +289,7 @@ public class ExtensionLoader<T> {
      * will be thrown.
      */
     @SuppressWarnings("unchecked")
+    //todo eircliu 生产的类通过名称找到扩展
     public T getExtension(String name) {
         if (name == null || name.length() == 0)
             throw new IllegalArgumentException("Extension name == null");
@@ -516,6 +517,7 @@ public class ExtensionLoader<T> {
                         Class<?> pt = method.getParameterTypes()[0];
                         try {
                             String property = method.getName().length() > 3 ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4) : "";
+                            //todo ericliu 需要调研ExtensionFactory AdaptiveExtensionFactory通过配置调用SpiAdaptiveExtensionFactory
                             Object object = objectFactory.getExtension(pt, property);
                             if (object != null) {
                                 method.invoke(instance, object);
@@ -544,6 +546,7 @@ public class ExtensionLoader<T> {
         return clazz;
     }
 
+    //todo ericliu 通过cachedclass获取扩展类列表，如果没有冲文件读取
     private Map<String, Class<?>> getExtensionClasses() {
         Map<String, Class<?>> classes = cachedClasses.get();
         if (classes == null) {
@@ -558,10 +561,11 @@ public class ExtensionLoader<T> {
         return classes;
     }
 
-    // synchronized in getExtensionClasses
+    // synchronized in getExtensionClasses todo eric 读取/meta-inf/dubbo下配置的SPI.
     private Map<String, Class<?>> loadExtensionClasses() {
         final SPI defaultAnnotation = type.getAnnotation(SPI.class);
         if (defaultAnnotation != null) {
+            //todo eric spi的vlue不为空生成的就是value对应的实现类
             String value = defaultAnnotation.value();
             if (value != null && (value = value.trim()).length() > 0) {
                 String[] names = NAME_SEPARATOR.split(value);
@@ -573,6 +577,7 @@ public class ExtensionLoader<T> {
             }
         }
 
+        //todo eric 读取文件
         Map<String, Class<?>> extensionClasses = new HashMap<String, Class<?>>();
         loadFile(extensionClasses, DUBBO_INTERNAL_DIRECTORY);
         loadFile(extensionClasses, DUBBO_DIRECTORY);
@@ -598,6 +603,7 @@ public class ExtensionLoader<T> {
                         try {
                             String line = null;
                             while ((line = reader.readLine()) != null) {
+                                //todo eric eg：dubbo=com.xxxx
                                 final int ci = line.indexOf('#');
                                 if (ci >= 0) line = line.substring(0, ci);
                                 line = line.trim();
@@ -611,11 +617,15 @@ public class ExtensionLoader<T> {
                                         }
                                         if (line.length() > 0) {
                                             Class<?> clazz = Class.forName(line, true, classLoader);
+                                            //todo ericliu type是超类
                                             if (!type.isAssignableFrom(clazz)) {
                                                 throw new IllegalStateException("Error when load extension class(interface: " +
                                                         type + ", class line: " + clazz.getName() + "), class "
                                                         + clazz.getName() + "is not subtype of interface.");
                                             }
+                                            /*todo ericliu  class如果有Adaptive注解 cachedAdaptiveClass为class。如果在判断
+                                             * todo 如果发现重复的Adaptive注解，抛异常
+                                             */
                                             if (clazz.isAnnotationPresent(Adaptive.class)) {
                                                 if (cachedAdaptiveClass == null) {
                                                     cachedAdaptiveClass = clazz;
@@ -625,6 +635,7 @@ public class ExtensionLoader<T> {
                                                             + ", " + clazz.getClass().getName());
                                                 }
                                             } else {
+                                                //todo ericliu 看是否修饰器模式如果是放在cachedWrapperClasses中
                                                 try {
                                                     clazz.getConstructor(type);
                                                     Set<Class<?>> wrappers = cachedWrapperClasses;
@@ -634,6 +645,7 @@ public class ExtensionLoader<T> {
                                                     }
                                                     wrappers.add(clazz);
                                                 } catch (NoSuchMethodException e) {
+                                                    //todo ericliu 不是修饰器模式,如果没有指定name生成一个name。短类名前缀
                                                     clazz.getConstructor();
                                                     if (name == null || name.length() == 0) {
                                                         name = findAnnotationName(clazz);
@@ -646,6 +658,7 @@ public class ExtensionLoader<T> {
                                                             }
                                                         }
                                                     }
+                                                    //todo ericliu 放在Map extensionClasses
                                                     String[] names = NAME_SEPARATOR.split(name);
                                                     if (names != null && names.length > 0) {
                                                         Activate activate = clazz.getAnnotation(Activate.class);
@@ -712,15 +725,19 @@ public class ExtensionLoader<T> {
 
     private Class<?> getAdaptiveExtensionClass() {
         getExtensionClasses();
+
+        //todo eircliu 类有@Adaptive，getExtensionClasses()的-->loadExtensionClasses()-->loadFile()如果将类缓存在cachedAdaptiveClass
         if (cachedAdaptiveClass != null) {
             return cachedAdaptiveClass;
         }
+        //todo ericliu 类沒有@Adaptive
         return cachedAdaptiveClass = createAdaptiveExtensionClass();
     }
 
     private Class<?> createAdaptiveExtensionClass() {
         String code = createAdaptiveExtensionClassCode();
         ClassLoader classLoader = findClassLoader();
+        //todo ericliu 按照逻辑应该javassist
         com.alibaba.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();
         return compiler.compile(code, classLoader);
     }
