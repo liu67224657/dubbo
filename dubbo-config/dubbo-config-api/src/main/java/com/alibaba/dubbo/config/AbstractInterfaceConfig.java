@@ -169,8 +169,17 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                 if (sysaddress != null && sysaddress.length() > 0) {
                     address = sysaddress;
                 }
-                if (address != null && address.length() > 0
+                if (address != null && address.length() > 0//todo ericliu address不为空，且不是N/A
                         && !RegistryConfig.NO_AVAILABLE.equalsIgnoreCase(address)) {
+                    /**
+                     * ericliu todo service值
+                     *  "path" -> "com.alibaba.dubbo.registry.RegistryService"
+                        "protocol" -> "dubbo"
+                        "application" -> "demo-provider"
+                        "dubbo" -> "2.0.0"
+                        "pid" -> "11069"
+                        "timestamp" -> "1514735434257"
+                     */
                     Map<String, String> map = new HashMap<String, String>();
                     appendParameters(map, application);
                     appendParameters(map, config);
@@ -191,7 +200,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                     List<URL> urls = UrlUtils.parseURLs(address, map);
                     for (URL url : urls) {
                         url = url.addParameter(Constants.REGISTRY_KEY, url.getProtocol());
-                        url = url.setProtocol(Constants.REGISTRY_PROTOCOL);
+                        url = url.setProtocol(Constants.REGISTRY_PROTOCOL);//增加参数registry=zookeeper，更换protocol为registry
                         if ((provider && url.getParameter(Constants.REGISTER_KEY, true))
                                 || (!provider && url.getParameter(Constants.SUBSCRIBE_KEY, true))) {
                             registryList.add(url);

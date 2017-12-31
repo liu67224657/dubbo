@@ -32,9 +32,9 @@ public class UrlUtils {
             return null;
         }
         String url;
-        if (address.indexOf("://") >= 0) {
+        if (address.indexOf("://") >= 0) {//eg:url=zookeepeer://127.0.0.1:2181
             url = address;
-        } else {
+        } else {//eg:url=127.0.0.1:2181?backup=127.0.0.2:2181
             String[] addresses = Constants.COMMA_SPLIT_PATTERN.split(address);
             url = addresses[0];
             if (addresses.length > 1) {
@@ -48,7 +48,7 @@ public class UrlUtils {
                 url += "?" + Constants.BACKUP_KEY + "=" + backup.toString();
             }
         }
-        String defaultProtocol = defaults == null ? null : defaults.get("protocol");
+        String defaultProtocol = defaults == null ? null : defaults.get("protocol");//eg dubbo
         if (defaultProtocol == null || defaultProtocol.length() == 0) {
             defaultProtocol = "dubbo";
         }
@@ -56,7 +56,7 @@ public class UrlUtils {
         String defaultPassword = defaults == null ? null : defaults.get("password");
         int defaultPort = StringUtils.parseInteger(defaults == null ? null : defaults.get("port"));
         String defaultPath = defaults == null ? null : defaults.get("path");
-        Map<String, String> defaultParameters = defaults == null ? null : new HashMap<String, String>(defaults);
+        Map<String, String> defaultParameters = defaults == null ? null : new HashMap<String, String>(defaults);//等到默认参数去掉一些关键参数
         if (defaultParameters != null) {
             defaultParameters.remove("protocol");
             defaultParameters.remove("username");
@@ -73,7 +73,7 @@ public class UrlUtils {
         String host = u.getHost();
         int port = u.getPort();
         String path = u.getPath();
-        Map<String, String> parameters = new HashMap<String, String>(u.getParameters());
+        Map<String, String> parameters = new HashMap<String, String>(u.getParameters());//从address中获取的parameter
         if ((protocol == null || protocol.length() == 0) && defaultProtocol != null && defaultProtocol.length() > 0) {
             changed = true;
             protocol = defaultProtocol;
@@ -111,14 +111,14 @@ public class UrlUtils {
                 String defaultValue = entry.getValue();
                 if (defaultValue != null && defaultValue.length() > 0) {
                     String value = parameters.get(key);
-                    if (value == null || value.length() == 0) {
+                    if (value == null || value.length() == 0) {//如果address中的参数和default的重复，以url的为主
                         changed = true;
                         parameters.put(key, defaultValue);
                     }
                 }
             }
         }
-        if (changed) {
+        if (changed) {//拼Url eg: zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=demo-service&dubbo=2.0.0&pid=xx&timestamp=
             u = new URL(protocol, username, password, host, port, path, parameters);
         }
         return u;

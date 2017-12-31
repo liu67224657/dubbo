@@ -176,6 +176,7 @@ public abstract class AbstractConfig implements Serializable {
         return tag;
     }
 
+    //config参数写入到map中key(getXXX()或者isXXX()的xxx，同时如果parameter注解不为空，且不是exclude，key喂props)-->value(method.invoke(config,object[0]{}))
     protected static void appendParameters(Map<String, String> parameters, Object config) {
         appendParameters(parameters, config, null);
     }
@@ -193,7 +194,7 @@ public abstract class AbstractConfig implements Serializable {
                         && !"getClass".equals(name)
                         && Modifier.isPublic(method.getModifiers())
                         && method.getParameterTypes().length == 0
-                        && isPrimitive(method.getReturnType())) {
+                        && isPrimitive(method.getReturnType())) {//get或者is开头，不是getClass。同时是public,修饰符是Public，返回值是原始类型（封装类）
                     Parameter parameter = method.getAnnotation(Parameter.class);
                     if (method.getReturnType() == Object.class || parameter != null && parameter.excluded()) {
                         continue;

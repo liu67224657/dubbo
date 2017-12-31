@@ -56,7 +56,7 @@ public class NetUtils {
         return RND_PORT_START + RANDOM.nextInt(RND_PORT_RANGE);
     }
 
-    public static int getAvailablePort() {
+    public static int getAvailablePort() {//长连接一下如果连的上返回
         ServerSocket ss = null;
         try {
             ss = new ServerSocket();
@@ -75,9 +75,10 @@ public class NetUtils {
     }
 
     public static int getAvailablePort(int port) {
-        if (port <= 0) {
+        if (port <= 0) {//没有设置
             return getAvailablePort();
         }
+        //设置了，从prot开始往后找到65535，没有用的设置一个并且保存到随机map中
         for (int i = port; i < MAX_PORT; i++) {
             ServerSocket ss = null;
             try {

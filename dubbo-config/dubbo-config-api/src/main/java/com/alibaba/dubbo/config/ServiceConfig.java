@@ -292,7 +292,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 throw new IllegalStateException("The local implementation class " + localClass.getName() + " not implement interface " + interfaceName);
             }
         }
-        if (stub != null) {
+        if (stub != null) {//todo stub???
             if ("true".equals(stub)) {
                 stub = interfaceName + "Stub";
             }
@@ -312,7 +312,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         appendProperties(this);
         checkStubAndMock(interfaceClass);//检查stub和mock服务是否存在
         if (path == null || path.length() == 0) {
-            path = interfaceName;
+            path = interfaceName;//注册中心注册时候url的path
         }
         doExportUrls();
         ProviderModel providerModel = new ProviderModel(getUniqueServiceName(), this, ref);
@@ -351,7 +351,6 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         unexported = true;
     }
 
-    //todo eircliu mark
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrls() {
         List<URL> registryURLs = loadRegistries(true);
@@ -443,7 +442,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 map.put("revision", revision);
             }
 
-            String[] methods = Wrapper.getWrapper(interfaceClass).getMethodNames();
+            String[] methods = Wrapper.getWrapper(interfaceClass).getMethodNames();//todo ??
             if (methods.length == 0) {
                 logger.warn("NO method found in service interface " + interfaceClass.getName());
                 map.put("methods", Constants.ANY_VALUE);
@@ -478,15 +477,16 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                     .getExtension(url.getProtocol()).getConfigurator(url).configure(url);
         }
 
+        //??
         String scope = url.getParameter(Constants.SCOPE_KEY);
         // don't export when none is configured
         if (!Constants.SCOPE_NONE.toString().equalsIgnoreCase(scope)) {
 
-            // export to local if the config is not remote (export to remote only when config is remote)
+            // export to local if the config is not remote (export to remote only when config is remote) 指定local或者什么都不指定
             if (!Constants.SCOPE_REMOTE.toString().equalsIgnoreCase(scope)) {
                 exportLocal(url);
             }
-            // export to remote if the config is not local (export to local only when config is local)
+            // export to remote if the config is not local (export to local only when config is local) 指定remote或者什么都不指定
             if (!Constants.SCOPE_LOCAL.toString().equalsIgnoreCase(scope)) {
                 if (logger.isInfoEnabled()) {
                     logger.info("Export dubbo service " + interfaceClass.getName() + " to url " + url);
@@ -501,6 +501,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         if (logger.isInfoEnabled()) {
                             logger.info("Register dubbo service " + interfaceClass.getName() + " url " + url + " to registry " + registryURL);
                         }
+                        //todo ???
                         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
                         DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
 
@@ -635,9 +636,9 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             if (portToBind == null || portToBind == 0) {
                 portToBind = defaultPort;
             }
-            if (portToBind == null || portToBind <= 0) {
-                portToBind = getRandomPort(name);
-                if (portToBind == null || portToBind < 0) {
+            if (portToBind == null || portToBind <= 0) {//设置的prot小于0随机分配一个可用端口
+                portToBind = getRandomPort(name);//从随机池里获取，没有的话给一个小于0的数，重复启动端口被占用起不来
+                if (portToBind == null || portToBind < 0) {//失败后
                     portToBind = getAvailablePort(defaultPort);
                     putRandomPort(name, portToBind);
                 }
