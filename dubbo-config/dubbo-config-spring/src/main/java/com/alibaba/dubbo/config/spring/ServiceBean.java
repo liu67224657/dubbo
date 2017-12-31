@@ -108,6 +108,7 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
         return service;
     }
 
+    //实现了ApplicationListener接口，ServiceBean被初始化或者刷新后调用逻辑,在服务中暴露接口，PS：该方法在注入属性时候，有可能被调用多次
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (isDelay() && !isExported() && !isUnexported()) {
             if (logger.isInfoEnabled()) {
@@ -117,6 +118,7 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
         }
     }
 
+    //新版支持supportedApplicationListener 同时不设置延迟启动时间？这方法名起的不好呀
     private boolean isDelay() {
         Integer delay = getDelay();
         ProviderConfig provider = getProvider();

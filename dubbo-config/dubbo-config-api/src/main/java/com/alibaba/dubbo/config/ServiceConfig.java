@@ -227,7 +227,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         if (interfaceName == null || interfaceName.length() == 0) {
             throw new IllegalStateException("<dubbo:service interface=\"\" /> interface not allow null!");
         }
-        checkDefault();
+        checkDefault();//设置默认值
         if (provider != null) {
             if (application == null) {
                 application = provider.getApplication();
@@ -273,8 +273,9 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
+            //检查服务接口以及方法
             checkInterfaceAndMethods(interfaceClass, methods);
-            checkRef();
+            checkRef();//检查注入的ref属性是不是Interface的实现类
             generic = Boolean.FALSE.toString();
         }
         if (local != null) {
@@ -305,11 +306,11 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 throw new IllegalStateException("The stub implementation class " + stubClass.getName() + " not implement interface " + interfaceName);
             }
         }
-        checkApplication();
-        checkRegistry();
-        checkProtocol();
+        checkApplication();//检查application. 必须存在
+        checkRegistry();//检查registry 必须存在
+        checkProtocol();//protocol 必须存在
         appendProperties(this);
-        checkStubAndMock(interfaceClass);
+        checkStubAndMock(interfaceClass);//检查stub和mock服务是否存在
         if (path == null || path.length() == 0) {
             path = interfaceName;
         }
@@ -350,6 +351,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         unexported = true;
     }
 
+    //todo eircliu mark
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrls() {
         List<URL> registryURLs = loadRegistries(true);
