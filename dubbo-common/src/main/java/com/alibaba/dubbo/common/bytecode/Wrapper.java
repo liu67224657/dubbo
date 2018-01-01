@@ -158,7 +158,7 @@ public abstract class Wrapper {
             }
             if (override) {
                 if (len > 0) {
-                    for (int l = 0; l < len; l++) {
+                    for (int l = 0; l < len; l++) {//ovrride方法$3是class.getName()比较参数类型的Name是否一致
                         c3.append(" && ").append(" $3[").append(l).append("].getName().equals(\"")
                                 .append(m.getParameterTypes()[l].getName()).append("\")");
                     }
@@ -174,10 +174,10 @@ public abstract class Wrapper {
 
             c3.append(" }");
 
-            mns.add(mn);
+            mns.add(mn);//方法List
             if (m.getDeclaringClass() == c)
-                dmns.add(mn);
-            ms.put(ReflectUtils.getDesc(m), m);
+                dmns.add(mn);//定义方法的list
+            ms.put(ReflectUtils.getDesc(m), m);//meth desc name(LString;LString)V-->mthod
         }
         if (hasMethod) {
             c3.append(" } catch(Throwable e) { ");
@@ -192,7 +192,7 @@ public abstract class Wrapper {
         for (Map.Entry<String, Method> entry : ms.entrySet()) {
             String md = entry.getKey();
             Method method = (Method) entry.getValue();
-            if ((matcher = ReflectUtils.GETTER_METHOD_DESC_PATTERN.matcher(md)).matches()) {
+            if ((matcher = ReflectUtils.GETTER_METHOD_DESC_PATTERN.matcher(md)).matches()) {//set get方法获取property属性
                 String pn = propertyName(matcher.group(1));
                 c2.append(" if( $2.equals(\"").append(pn).append("\") ){ return ($w)w.").append(method.getName()).append("(); }");
                 pts.put(pn, method.getReturnType());

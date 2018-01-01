@@ -19,4 +19,6 @@ public interface DemoService {
 
     String sayHello(String name);
 
+    void sayHelloWorld(String param1,String param2);
+
 }

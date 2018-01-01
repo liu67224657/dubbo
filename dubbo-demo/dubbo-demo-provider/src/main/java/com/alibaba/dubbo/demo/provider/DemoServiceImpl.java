@@ -28,4 +28,8 @@ public class DemoServiceImpl implements DemoService {
         return "Hello " + name + ", response form provider: " + RpcContext.getContext().getLocalAddress();
     }
 
+    @Override
+    public void sayHelloWorld(String param1,String param2) {
+        System.out.println("hello wolrd");
+    }
 }

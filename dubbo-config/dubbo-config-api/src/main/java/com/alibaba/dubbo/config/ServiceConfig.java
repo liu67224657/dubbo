@@ -500,7 +500,17 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         if (logger.isInfoEnabled()) {
                             logger.info("Register dubbo service " + interfaceClass.getName() + " url " + url + " to registry " + registryURL);
                         }
-                        //todo ???
+                        /**
+                         * 查看的加载机制：
+                         * 因为proxyFactory是调用ExtensionLoader.getAdaptiveExtension生成的的。实际上是javassist动态生成的类
+                         * 在export(com.alibaba.dubbo.rpc.Invoker arg0)方法中有一行代码
+                         * ...
+                         * String extName = (url.getProtocol() == null ? "dubbo" : url.getProtocol());
+                         * com.alibaba.dubbo.rpc.Protocol extension = (com.alibaba.dubbo.rpc.Protocol) ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.rpc.Protocol.class).getExtension(extName);
+                         * ...
+                         * 这里的extension是registry。所以调用RegistryProtcol的export
+                         *
+                         */
                         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
                         DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
 

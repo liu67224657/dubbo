@@ -22,4 +22,8 @@ public class DefaultDemoService implements DemoService {
         return "DefaultDemoService - sayHell() : " + name;
     }
 
+    @Override
+    public void sayHelloWorld(String param1,String param2) {
+        System.out.println( "DefaultDemoService - sayHell() : " +param1+" "+param2);
+    }
 }
