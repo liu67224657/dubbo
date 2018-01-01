@@ -477,7 +477,6 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                     .getExtension(url.getProtocol()).getConfigurator(url).configure(url);
         }
 
-        //??
         String scope = url.getParameter(Constants.SCOPE_KEY);
         // don't export when none is configured
         if (!Constants.SCOPE_NONE.toString().equalsIgnoreCase(scope)) {
@@ -527,6 +526,15 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                     .setProtocol(Constants.LOCAL_PROTOCOL)
                     .setHost(LOCALHOST)
                     .setPort(0);
+
+            /**
+             * todo protocol
+             * 采用getAdaptiveExtension()动态加载点用javassist生成一个类,在export(com.alibaba.dubbo.rpc.Invoker arg0)方法中有
+             * String extName = (url.getProtocol() == null ? "dubbo" : url.getProtocol());
+             * com.alibaba.dubbo.rpc.Protocol extension = (com.alibaba.dubbo.rpc.Protocol) ExtensionLoader
+             *  .getExtensionLoader(com.alibaba.dubbo.rpc.Protocol.class).getExtension(extName);
+                这里的extension是injvm
+             */
             Exporter<?> exporter = protocol.export(
                     proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
             exporters.add(exporter);
