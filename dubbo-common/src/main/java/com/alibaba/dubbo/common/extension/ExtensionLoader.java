@@ -1,12 +1,12 @@
 /*
  * Copyright 1999-2011 Alibaba Group.
- *  
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *  
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -743,7 +743,7 @@ public class ExtensionLoader<T> {
     }
 
     private String createAdaptiveExtensionClassCode() {
-        StringBuilder codeBuidler = new StringBuilder();
+        StringBuilder codeBuidler = new StringBuilder();//todo eircliu 类的StringBuidler
         Method[] methods = type.getMethods();
         boolean hasAdaptiveAnnotation = false;
         for (Method m : methods) {
@@ -766,8 +766,8 @@ public class ExtensionLoader<T> {
             Class<?>[] ets = method.getExceptionTypes();
 
             Adaptive adaptiveAnnotation = method.getAnnotation(Adaptive.class);
-            StringBuilder code = new StringBuilder(512);
-            if (adaptiveAnnotation == null) {
+            StringBuilder code = new StringBuilder(512);//方法的builder
+            if (adaptiveAnnotation == null) {//TODO ericliu 没有注解调用方法直接抛异常
                 code.append("throw new UnsupportedOperationException(\"method ")
                         .append(method.toString()).append(" of interface ")
                         .append(type.getName()).append(" is not adaptive method!\");");
@@ -793,7 +793,7 @@ public class ExtensionLoader<T> {
                 else {
                     String attribMethod = null;
 
-                    // find URL getter method
+                    // find URL getter method todo ericliu 参数如果有getUrl方法
                     LBL_PTS:
                     for (int i = 0; i < pts.length; ++i) {
                         Method[] ms = pts[i].getMethods();
@@ -889,6 +889,14 @@ public class ExtensionLoader<T> {
                             getNameCode = String.format("url.getProtocol() == null ? (%s) : url.getProtocol()", getNameCode);
                     }
                 }
+                /**
+                 * todo ericliu ****关键代码***
+                 * todo value--adaptive注解如果有参数就取参数，没有的话用type（级ExtensionLoader中参数的simpleName）；
+                 * todo url是关键参数，后面的代理方法都是从url的protocol,Parameter，MethodParameter中取值
+                 * todo 1、如果是protocol从protocol中取，value
+                 * todo 2、如果参数是Invocation,从MethodParameter方法参数中取如果不是参数中去
+                 * todo 3、从Parameter中取
+                 **/
                 code.append("\nString extName = ").append(getNameCode).append(";");
                 // check extName == null?
                 String s = String.format("\nif(extName == null) " +
@@ -896,6 +904,7 @@ public class ExtensionLoader<T> {
                         type.getName(), Arrays.toString(value));
                 code.append(s);
 
+                //todo ericliu 关键代码调用ExtensionLoader.getExtensionLoader.getExtension(extName);
                 s = String.format("\n%s extension = (%<s)%s.getExtensionLoader(%s.class).getExtension(extName);",
                         type.getName(), ExtensionLoader.class.getSimpleName(), type.getName());
                 code.append(s);
@@ -951,3 +960,4 @@ public class ExtensionLoader<T> {
     }
 
 }
+
