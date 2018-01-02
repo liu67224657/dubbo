@@ -301,7 +301,7 @@ public class ExtensionLoader<T> {
             cachedInstances.putIfAbsent(name, new Holder<Object>());
             holder = cachedInstances.get(name);
         }
-        Object instance = holder.get();
+        Object instance = holder.get();//单例，初始化holder
         if (instance == null) {
             synchronized (holder) {
                 instance = holder.get();
@@ -493,7 +493,13 @@ public class ExtensionLoader<T> {
                 EXTENSION_INSTANCES.putIfAbsent(clazz, (T) clazz.newInstance());
                 instance = (T) EXTENSION_INSTANCES.get(clazz);
             }
-            injectExtension(instance);
+            injectExtension(instance);//todo ericliu 生成spi-name对应的实例
+            /**
+             * todo ericliu 在创建扩展时候判断是否有Wrapper封装类，即修饰器模式的类，如果有。
+             * todo ericliu 1、cachedWrapperClasses的初始化：在loadFile()中判断如果是修饰器模式（反射的构造函数有带自己类型的构造函数）
+             * todo ericliu 2、生成修饰器实例；
+             * todo ericliu eg: PrxyFactory用StubProxyFactoryWrapper封装一层
+             */
             Set<Class<?>> wrapperClasses = cachedWrapperClasses;
             if (wrapperClasses != null && wrapperClasses.size() > 0) {
                 for (Class<?> wrapperClass : wrapperClasses) {
