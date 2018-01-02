@@ -34,6 +34,10 @@ import java.util.regex.Matcher;
 
 /**
  * Wrapper.
+ * todo ericliu 本质上是一个多例模式的服务代理容器。
+ * 1、服务代理的代理封装类，WRAPPER_MAP中key--服务的interface,value--javassist生成一个服务代理类主要方法在invokeMethod
+ * 2、在ProxyFactory通过Adaptive注解调用到JavassistProxyFactory，的getInvoker方法中通过interface获取wrapper。new一个AbstractProxyInvoker
+ * 3、由于Proxy传入的是ref--服务的实现类，在doInvoke时候，wrap的invokeMethod会调用实现类的方法
  */
 public abstract class Wrapper {
     private static final Map<Class<?>, Wrapper> WRAPPER_MAP = new ConcurrentHashMap<Class<?>, Wrapper>(); //class wrapper map

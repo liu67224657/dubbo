@@ -40,9 +40,9 @@ public interface ProxyFactory {
      * create invoker.
      *
      * @param <T>
-     * @param proxy
-     * @param type
-     * @param url
+     * @param proxy 一般为ref即实现类
+     * @param type  一般为接口类型
+     * @param url 注册的url
      * @return invoker
      */
     @Adaptive({Constants.PROXY_KEY})
