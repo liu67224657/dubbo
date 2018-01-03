@@ -120,6 +120,7 @@ public class RegistryProtocol implements Protocol {
         //export invoker
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker);
 
+        //todo ericliu mark
         URL registryUrl = getRegistryUrl(originInvoker);
 
         //registry provider
@@ -171,7 +172,7 @@ public class RegistryProtocol implements Protocol {
 
     @SuppressWarnings("unchecked")
     private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker) {
-        String key = getCacheKey(originInvoker);
+        String key = getCacheKey(originInvoker);//获取invoker.getUrl()中的Parameter"export"即在ServiceConfig中添加的exportkey,及provider的Url，
         ExporterChangeableWrapper<T> exporter = (ExporterChangeableWrapper<T>) bounds.get(key);
         if (exporter == null) {
             synchronized (bounds) {
@@ -329,7 +330,7 @@ public class RegistryProtocol implements Protocol {
         bounds.clear();
     }
 
-    public static class InvokerDelegete<T> extends InvokerWrapper<T> {
+    public static class InvokerDelegete<T> extends InvokerWrapper<T> {//todo 这个类做什么用的？直接InvokerWrapper不行么
         private final Invoker<T> invoker;
 
         /**

@@ -497,8 +497,8 @@ public class ExtensionLoader<T> {
             /**
              * todo ericliu 在创建扩展时候判断是否有Wrapper封装类，即修饰器模式的类，如果有。
              * todo ericliu 1、cachedWrapperClasses的初始化：在loadFile()中判断如果是修饰器模式（反射的构造函数有带自己类型的构造函数）
-             * todo ericliu 2、生成修饰器实例；
-             * todo ericliu eg: PrxyFactory用StubProxyFactoryWrapper封装一层
+             * todo ericliu 2、生成修饰器实例；注意：如果在for循环中instance生成的是封装类对象。
+             * todo ericliu eg: StubProxyFactoryWrapper(PrxyFactory)封装一层;ProtocolFilterWrapper(ProtocolListenerWrapper(DubboProtocol))
              */
             Set<Class<?>> wrapperClasses = cachedWrapperClasses;
             if (wrapperClasses != null && wrapperClasses.size() > 0) {
