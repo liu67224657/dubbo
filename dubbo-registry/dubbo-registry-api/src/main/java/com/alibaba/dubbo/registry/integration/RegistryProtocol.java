@@ -172,13 +172,18 @@ public class RegistryProtocol implements Protocol {
 
     @SuppressWarnings("unchecked")
     private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker) {
-        String key = getCacheKey(originInvoker);//获取invoker.getUrl()中的Parameter"export"即在ServiceConfig中添加的exportkey,及provider的Url，
+        //获取invoker.getUrl()中的Parameter"export"即在ServiceConfig中添加的exportkey,及provider的Url
+        String key = getCacheKey(originInvoker);
+
         ExporterChangeableWrapper<T> exporter = (ExporterChangeableWrapper<T>) bounds.get(key);
         if (exporter == null) {
             synchronized (bounds) {
                 exporter = (ExporterChangeableWrapper<T>) bounds.get(key);
                 if (exporter == null) {
                     final Invoker<?> invokerDelegete = new InvokerDelegete<T>(originInvoker, getProviderUrl(originInvoker));
+                    //todo 根据provderUrl的protocol调用相应协议这里是（dubbo）
+                    //todo dubbo://172.25.29.60:20880/com.alibaba.dubbo.demo.DemoService?anyhost=true&application=demo-provider&bind.ip=172.25.29.60&bind.port=20880&dubbo=2.0.0&generic=false&interface=com.alibaba.dubbo.demo.DemoService&methods=sayHello,sayHelloWorld&pid=65685&side=provider&timestamp=1514988429189
+                    //ExporterChangeableWrapper作用是传递originInvoker，因为protocol生成的Exporter中的invoker是invokerDelegete
                     exporter = new ExporterChangeableWrapper<T>((Exporter<T>) protocol.export(invokerDelegete), originInvoker);
                     bounds.put(key, exporter);
                 }
