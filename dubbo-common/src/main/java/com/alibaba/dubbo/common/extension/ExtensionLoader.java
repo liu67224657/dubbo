@@ -867,6 +867,8 @@ public class ExtensionLoader<T> {
                 String defaultExtName = cachedDefaultName;
                 String getNameCode = null;
                 for (int i = value.length - 1; i >= 0; --i) {
+                    //todo 倒序循环后面一个key从Url读出来的值传递给前一个注解的key
+                    // 即：{A,B} url.getParameter(A,getParameter(B,defaultExtName))
                     if (i == value.length - 1) {
                         if (null != defaultExtName) {
                             if (!"protocol".equals(value[i]))

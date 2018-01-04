@@ -266,7 +266,7 @@ public class DubboProtocol extends AbstractProtocol {
         if (str != null && str.length() > 0 && !ExtensionLoader.getExtensionLoader(Transporter.class).hasExtension(str))
             throw new RpcException("Unsupported server type: " + str + ", url: " + url);
 
-        url = url.addParameter(Constants.CODEC_KEY, DubboCodec.NAME);
+        url = url.addParameter(Constants.CODEC_KEY, DubboCodec.NAME);//add codec dubbo
         ExchangeServer server;
         try {
             server = Exchangers.bind(url, requestHandler);

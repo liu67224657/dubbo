@@ -38,7 +38,9 @@ public class HeaderExchanger implements Exchanger {
         return new HeaderExchangeClient(Transporters.connect(url, new DecodeHandler(new HeaderExchangeHandler(handler))), true);
     }
 
+    //Provider启动会调用
     public ExchangeServer bind(URL url, ExchangeHandler handler) throws RemotingException {
+        //hanlder调用逻辑。DecodeHandler(这是一个deleagte用于decode message)-->HeaderExchangeHandler(这是一个deleagte)-->handler(处理消息的类)
         return new HeaderExchangeServer(Transporters.bind(url, new DecodeHandler(new HeaderExchangeHandler(handler))));
     }
 

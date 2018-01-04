@@ -46,7 +46,7 @@ public class ChannelHandlers {
         INSTANCE = instance;
     }
 
-    protected ChannelHandler wrapInternal(ChannelHandler handler, URL url) {
+    protected ChannelHandler wrapInternal(ChannelHandler handler, URL url) {//todo ericliu mark!
         return new MultiMessageHandler(new HeartbeatHandler(ExtensionLoader.getExtensionLoader(Dispatcher.class)
                 .getAdaptiveExtension().dispatch(handler, url)));
     }
