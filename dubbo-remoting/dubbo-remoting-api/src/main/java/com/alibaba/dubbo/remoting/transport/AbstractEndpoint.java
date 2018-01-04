@@ -34,7 +34,7 @@ public abstract class AbstractEndpoint extends AbstractPeer implements Resetable
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractEndpoint.class);
 
-    private Codec2 codec;
+    private Codec2 codec;//默认用DubboCodec
 
     private int timeout;
 

@@ -51,6 +51,12 @@ final class NettyCodecAdapter {
 
     private final com.alibaba.dubbo.remoting.ChannelHandler handler;
 
+    /**
+     *  默认是DubboCodec
+     * @param codec
+     * @param url
+     * @param handler
+     */
     public NettyCodecAdapter(Codec2 codec, URL url, com.alibaba.dubbo.remoting.ChannelHandler handler) {
         this.codec = codec;
         this.url = url;
