@@ -66,7 +66,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
             group = Constants.PATH_SEPARATOR + group;
         }
         this.root = group;
-        zkClient = zookeeperTransporter.connect(url);
+        zkClient = zookeeperTransporter.connect(url);//todo ericliu 链接zookeeper默认调用ZkclientZookeeperClient
+        //todo ericliu 增加状态监听类-->添加到AbstractZookeeperClient定义的stateListeners中，
+        //todo ericliu 在ZkclientZookeeperClient中构造方法add了zookeeper自己的listener-->StateListener.stateChanged
         zkClient.addStateListener(new StateListener() {
             public void stateChanged(int state) {
                 if (state == RECONNECTED) {

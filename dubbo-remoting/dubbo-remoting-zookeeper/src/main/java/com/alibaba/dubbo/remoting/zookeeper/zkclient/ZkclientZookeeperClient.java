@@ -34,10 +34,11 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
     private final ZkClientWrapper client;
 
     private volatile KeeperState state = KeeperState.SyncConnected;
-
     public ZkclientZookeeperClient(URL url) {
         super(url);
+        //todo ericliu 有于比较耗时创建zkClient放在一个FutrueTask中，在调用start时候进行创建
         client = new ZkClientWrapper(url.getBackupAddress(), 30000);
+        //todo ericliu 添加状态监听类实际上调用的是StatListerner,目前看只有Reconneted时间处理了
         client.addListener(new IZkStateListener() {
             public void handleStateChanged(KeeperState state) throws Exception {
                 ZkclientZookeeperClient.this.state = state;
@@ -52,7 +53,11 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
                 stateChanged(StateListener.RECONNECTED);
             }
         });
-        client.start();
+        client.start();//todo ericliu 异步方式情动
+
+        //todo ericliju 具体调用逻辑请看ZkClientWrapper，
+        //todo ericliu 1、用FtureTask异步创建zkClient连接，
+        //todo ericliu 2、创建完成后通过done的逻辑里zkClient订阅lisenter
     }
 
 

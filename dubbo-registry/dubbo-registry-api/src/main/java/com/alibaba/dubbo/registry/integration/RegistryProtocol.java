@@ -123,7 +123,7 @@ public class RegistryProtocol implements Protocol {
         //todo ericliu 更换url的registy参数到Protocol，即：registry://xxx--zookeeper://
         URL registryUrl = getRegistryUrl(originInvoker);
 
-        //registry provider todo ericliu  得到zookeeperRegistry
+        //registry provider todo ericliu  得到zookeeperRegistry 并且连接zookeeper
         final Registry registry = getRegistry(originInvoker);
         final URL registedProviderUrl = getRegistedProviderUrl(originInvoker);
 
