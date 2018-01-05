@@ -47,12 +47,15 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
     public WrappedChannelHandler(ChannelHandler handler, URL url) {
         this.handler = handler;
         this.url = url;
+        //todo 初始化线程池，默认是FixedThreadPool.getExecutor
         executor = (ExecutorService) ExtensionLoader.getExtensionLoader(ThreadPool.class).getAdaptiveExtension().getExecutor(url);
-
+        //todo 如果是服務端componentKey=consumer否則=java.util.concurrent.ExecutorService
         String componentKey = Constants.EXECUTOR_SERVICE_COMPONENT_KEY;
         if (Constants.CONSUMER_SIDE.equalsIgnoreCase(url.getParameter(Constants.SIDE_KEY))) {
             componentKey = Constants.CONSUMER_SIDE;
         }
+
+        //todo 把线程池存起来，在netteyserver的close restet调用
         DataStore dataStore = ExtensionLoader.getExtensionLoader(DataStore.class).getDefaultExtension();
         dataStore.put(componentKey, Integer.toString(url.getPort()), executor);
     }

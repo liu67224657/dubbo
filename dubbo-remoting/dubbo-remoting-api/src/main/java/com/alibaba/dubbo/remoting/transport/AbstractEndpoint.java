@@ -47,6 +47,9 @@ public abstract class AbstractEndpoint extends AbstractPeer implements Resetable
         this.connectTimeout = url.getPositiveParameter(Constants.CONNECT_TIMEOUT_KEY, Constants.DEFAULT_CONNECT_TIMEOUT);
     }
 
+    /*
+    server啟動：在DubboProtocol的createService中set了Constants.CODEC_KEY为dubbo，通过spi的extensloader加载DubboCountCodec
+     */
     protected static Codec2 getChannelCodec(URL url) {
         String codecName = url.getParameter(Constants.CODEC_KEY, "telnet");
         if (ExtensionLoader.getExtensionLoader(Codec2.class).hasExtension(codecName)) {

@@ -41,6 +41,13 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
         factories = Collections.unmodifiableList(list);
     }
 
+    /**
+     * 循环调用获取相应的对象，有限spi目前来说
+     * @param type object type.
+     * @param name object name.
+     * @param <T>
+     * @return
+     */
     public <T> T getExtension(Class<T> type, String name) {
         for (ExtensionFactory factory : factories) {
             T extension = factory.getExtension(type, name);

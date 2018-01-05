@@ -94,6 +94,7 @@ public class ExtensionLoader<T> {
 
     private ExtensionLoader(Class<?> type) {
         this.type = type;
+        //ExtensionFactory不会初始化自己，在其他的ExtensionLoader中会初始化AdaptiveExtension
         objectFactory = (type == ExtensionFactory.class ? null : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());
     }
 
@@ -513,6 +514,14 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /*
+        todo ericliu
+        通过objectFacory注入为instance注入属性
+        1、判断instance中所有的合法的set方法并且转成property。
+        2、通过调用objectFactory.getExtension注入属性。objectFactory是AdaptiveExtensionFactory类
+        3、通过AdaptiveExtensionFactory看出将SpiExtensionFactory和SpringExtensionFactory轮寻注入到instance对应的属性中
+        4、ps:看代码是以spi为主
+     */
     private T injectExtension(T instance) {
         try {
             if (objectFactory != null) {
@@ -523,7 +532,7 @@ public class ExtensionLoader<T> {
                         Class<?> pt = method.getParameterTypes()[0];
                         try {
                             String property = method.getName().length() > 3 ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4) : "";
-                            //todo ericliu 需要调研ExtensionFactory AdaptiveExtensionFactory通过配置调用SpiAdaptiveExtensionFactory
+
                             Object object = objectFactory.getExtension(pt, property);
                             if (object != null) {
                                 method.invoke(instance, object);
@@ -629,8 +638,9 @@ public class ExtensionLoader<T> {
                                                         type + ", class line: " + clazz.getName() + "), class "
                                                         + clazz.getName() + "is not subtype of interface.");
                                             }
-                                            /*todo ericliu  class如果有Adaptive注解 cachedAdaptiveClass为class。如果在判断
-                                             * todo 如果发现重复的Adaptive注解，抛异常
+                                            /*todo ericliu  class如果有Adaptive注解 cachedAdaptiveClass为class。
+                                             *todo ericliu一个ExtensionLoader只能有一个注解，如果发现重复的Adaptive注解，抛异常
+                                             *
                                              */
                                             if (clazz.isAnnotationPresent(Adaptive.class)) {
                                                 if (cachedAdaptiveClass == null) {
@@ -733,6 +743,7 @@ public class ExtensionLoader<T> {
         getExtensionClasses();
 
         //todo eircliu 类有@Adaptive，getExtensionClasses()的-->loadExtensionClasses()-->loadFile()如果将类缓存在cachedAdaptiveClass
+        //todo ericliu 直接返回@Adaptive注解的类生成实力，目前只有 AdaptiveCompiler 和 AdaptiveExtensionFactory，其他的都是通过url生成动态代理
         if (cachedAdaptiveClass != null) {
             return cachedAdaptiveClass;
         }
