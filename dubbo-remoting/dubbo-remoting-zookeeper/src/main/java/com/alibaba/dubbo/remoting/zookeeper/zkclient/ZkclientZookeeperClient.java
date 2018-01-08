@@ -53,11 +53,14 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
                 stateChanged(StateListener.RECONNECTED);
             }
         });
-        client.start();//todo ericliu 异步方式情动
 
-        //todo ericliju 具体调用逻辑请看ZkClientWrapper，
+        //todo ericliu 异步方式启动
+        //todo ericliu 具体调用逻辑请看ZkClientWrapper，
         //todo ericliu 1、用FtureTask异步创建zkClient连接，
         //todo ericliu 2、创建完成后通过done的逻辑里zkClient订阅lisenter
+        client.start();
+
+
     }
 
 
