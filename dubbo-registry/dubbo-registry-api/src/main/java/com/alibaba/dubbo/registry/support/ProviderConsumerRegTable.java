@@ -33,9 +33,18 @@ public class ProviderConsumerRegTable {
     public static ConcurrentHashMap<String, Set<ProviderInvokerWrapper>> providerInvokers = new ConcurrentHashMap<String, Set<ProviderInvokerWrapper>>();
     public static ConcurrentHashMap<String, Set<ConsumerInvokerWrapper>> consumerInvokers = new ConcurrentHashMap<String, Set<ConsumerInvokerWrapper>>();
 
+    /**
+     * 注册Provider个注册中心
+     * 1、将所有的信息封装成ProviderInvokerWrapper，
+     * 2、生成serviceUniqueName格式是 group/interface:version
+     * 3、放在Map，providerInvokers.put(生成serviceUniqueName,ProviderInvokerWrapper)
+     * @param invoker 代理类 包含调用的封装
+     * @param registryUrl registry协议
+     * @param providerUrl provier协议
+     */
     public static void registerProvider(Invoker invoker, URL registryUrl, URL providerUrl) {
         ProviderInvokerWrapper wrapperInvoker = new ProviderInvokerWrapper(invoker, registryUrl, providerUrl);
-        String serviceUniqueName = providerUrl.getServiceKey();
+        String serviceUniqueName = providerUrl.getServiceKey();// todo ericliu 协议格式 group/interface:version
         Set<ProviderInvokerWrapper> invokers = providerInvokers.get(serviceUniqueName);
         if (invokers == null) {
             providerInvokers.putIfAbsent(serviceUniqueName, new ConcurrentHashSet<ProviderInvokerWrapper>());

@@ -50,6 +50,7 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
     }
 
     public void create(String path, boolean ephemeral) {
+        //todo ericliu mark!
         int i = path.lastIndexOf('/');
         if (i > 0) {
             String parentPath = path.substring(0, i);

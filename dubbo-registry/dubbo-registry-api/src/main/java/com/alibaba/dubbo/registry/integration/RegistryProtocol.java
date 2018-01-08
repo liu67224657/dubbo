@@ -113,6 +113,8 @@ public class RegistryProtocol implements Protocol {
 
     public void register(URL registryUrl, URL registedProviderUrl) {
         Registry registry = registryFactory.getRegistry(registryUrl);
+        //todo ericliu 调用关系 -->FailbackRegistry.register-->FailbackRegistry.doRegister-->ZookeeperRegistry.doRegister
+        //todo ericliu 在zkClient中写入（/dubbo/<interface>/providers/<urls> true）
         registry.register(registedProviderUrl);
     }
 
@@ -123,7 +125,7 @@ public class RegistryProtocol implements Protocol {
         URL registryUrl = getRegistryUrl(originInvoker);
 
         //registry provider
-        final Registry registry = getRegistry(originInvoker);
+        final Registry registry = getRegistry(originInvoker);//todo ericliu connect zookeeper
         final URL registedProviderUrl = getRegistedProviderUrl(originInvoker);
 
         //to judge to delay publish whether or not
@@ -132,7 +134,7 @@ public class RegistryProtocol implements Protocol {
         ProviderConsumerRegTable.registerProvider(originInvoker, registryUrl, registedProviderUrl);
 
         if (register) {
-            register(registryUrl, registedProviderUrl);
+            register(registryUrl, registedProviderUrl);//todo ericliu 向zookeeper注册provider
             ProviderConsumerRegTable.getProviderWrapper(originInvoker).setReg(true);
         }
 
