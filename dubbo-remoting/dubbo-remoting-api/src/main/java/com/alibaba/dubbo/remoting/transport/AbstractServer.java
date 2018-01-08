@@ -69,6 +69,7 @@ public abstract class AbstractServer extends AbstractEndpoint implements Server 
                     + " on " + getLocalAddress() + ", cause: " + t.getMessage(), t);
         }
         //fixme replace this with better method
+        // todo ericliu 获取线程池
         DataStore dataStore = ExtensionLoader.getExtensionLoader(DataStore.class).getDefaultExtension();
         executor = (ExecutorService) dataStore.get(Constants.EXECUTOR_SERVICE_COMPONENT_KEY, Integer.toString(url.getPort()));
     }

@@ -61,7 +61,7 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
 
     public void received(Channel channel, Object message) throws RemotingException {
         setReadTimestamp(channel);
-        if (isHeartbeatRequest(message)) {
+        if (isHeartbeatRequest(message)) {//todo 处理心跳请求事件，如果是心跳请求，发送个心跳请求过去
             Request req = (Request) message;
             if (req.isTwoWay()) {
                 Response res = new Response(req.getId(), req.getVersion());
@@ -79,7 +79,7 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
             return;
         }
         if (isHeartbeatResponse(message)) {
-            if (logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled()) {//todo 处理心跳响应事件,如果是心跳相应了，打印信息
                 logger.debug(
                         new StringBuilder(32)
                                 .append("Receive heartbeat response in thread ")

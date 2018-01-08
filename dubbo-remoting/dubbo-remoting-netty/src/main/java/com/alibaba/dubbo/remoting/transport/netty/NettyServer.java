@@ -58,17 +58,19 @@ public class NettyServer extends AbstractServer implements Server {
     private org.jboss.netty.channel.Channel channel;
 
     public NettyServer(URL url, ChannelHandler handler) throws RemotingException {
-        super(url, ChannelHandlers.wrap(handler, ExecutorUtil.setThreadName(url, SERVER_THREAD_POOL_NAME)));
+        super(url, ChannelHandlers.wrap(handler, ExecutorUtil.setThreadName(url, SERVER_THREAD_POOL_NAME)));//todo ericliu 在父类调用doopen
     }
 
     @Override
-    protected void doOpen() throws Throwable {
+    protected void doOpen() throws Throwable {//todo ericliu 查看netty的api
         NettyHelper.setNettyLoggerFactory();
         ExecutorService boss = Executors.newCachedThreadPool(new NamedThreadFactory("NettyServerBoss", true));
         ExecutorService worker = Executors.newCachedThreadPool(new NamedThreadFactory("NettyServerWorker", true));
+        //work工作线程数是区间[Runtime.getRuntime().availableProcessors()+1---32]
         ChannelFactory channelFactory = new NioServerSocketChannelFactory(boss, worker, getUrl().getPositiveParameter(Constants.IO_THREADS_KEY, Constants.DEFAULT_IO_THREADS));
         bootstrap = new ServerBootstrap(channelFactory);
 
+        //url，和Serverhandler-->MultiMessageHandler-->HeartbeatHandler-->AllChannelHandler-->....最终到ExcnahngeHandler
         final NettyHandler nettyHandler = new NettyHandler(getUrl(), this);
         channels = nettyHandler.getChannels();
         // https://issues.jboss.org/browse/NETTY-365

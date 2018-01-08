@@ -24,7 +24,7 @@ import com.alibaba.dubbo.common.extension.SPI;
 import javax.sound.midi.Receiver;
 
 /**
- * Transporter. (SPI, Singleton, ThreadSafe)
+ * Transporter. (SPI, Singleton, ThreadSafe) netty netty4 mina grizzly 默认是netty
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Transport_Layer">Transport Layer</a>
  * <a href="http://en.wikipedia.org/wiki/Client%E2%80%93server_model">Client/Server</a>

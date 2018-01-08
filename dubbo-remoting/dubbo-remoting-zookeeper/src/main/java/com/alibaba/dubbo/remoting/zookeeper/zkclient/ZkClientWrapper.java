@@ -46,7 +46,12 @@ public class ZkClientWrapper {
     private ListenableFutureTask<ZkClient> listenableFutureTask;
     private volatile boolean started = false;
 
-
+    /**
+     * 1、建立ListenableFutureTask，在调用ZkClientWrapper.start方法时候创建zkClient,
+     * 2、在创建完成时候调建立ListenableFutureTask.done方法，执行zookeeper状态
+     * @param serverAddr
+     * @param timeout
+     */
     public ZkClientWrapper(final String serverAddr, long timeout) {
         this.timeout = timeout;
         listenableFutureTask = ListenableFutureTask.create(new Callable<ZkClient>() {
@@ -57,9 +62,12 @@ public class ZkClientWrapper {
         });
     }
 
+    /**
+     * 执行用Thread异步执行修改标记
+     */
     public void start() {
         if (!started) {
-            Thread connectThread = new Thread(listenableFutureTask);
+            Thread connectThread = new Thread(listenableFutureTask);//异步启动
             connectThread.setName("DubboZkclientConnector");
             connectThread.setDaemon(true);
             connectThread.start();
@@ -74,6 +82,11 @@ public class ZkClientWrapper {
         }
     }
 
+    /**
+     * 1、将IZkStateListener添加到listenableFutureTask.executionList中
+     * 2、在done()方法之后调用execution.excute()执行run,将zkClint订阅IZkStateListener状态变化
+     * @param listener
+     */
     public void addListener(final IZkStateListener listener) {
         listenableFutureTask.addListener(new Runnable() {
             @Override

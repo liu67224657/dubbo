@@ -119,13 +119,14 @@ public class RegistryProtocol implements Protocol {
     }
 
     public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcException {
-        //export invoker
+        //export invoker todo ericliu 开启服务监听本地端口，默认是dubbo协议，采用netty
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker);
 
+        //todo ericliu 更换url的registy参数到Protocol，即：registry://xxx--zookeeper://
         URL registryUrl = getRegistryUrl(originInvoker);
 
-        //registry provider
-        final Registry registry = getRegistry(originInvoker);//todo ericliu connect zookeeper
+        //registry provider todo ericliu  得到zookeeperRegistry 并且连接zookeeper
+        final Registry registry = getRegistry(originInvoker);
         final URL registedProviderUrl = getRegistedProviderUrl(originInvoker);
 
         //to judge to delay publish whether or not

@@ -81,7 +81,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
     }
 
     public Registry getRegistry(URL url) {
-        url = url.setPath(RegistryService.class.getName())
+        url = url.setPath(RegistryService.class.getName())//todo ericliu 设置registry的path，interface，删除eport refer参数
                 .addParameter(Constants.INTERFACE_KEY, RegistryService.class.getName())
                 .removeParameters(Constants.EXPORT_KEY, Constants.REFER_KEY);
         String key = url.toServiceString();

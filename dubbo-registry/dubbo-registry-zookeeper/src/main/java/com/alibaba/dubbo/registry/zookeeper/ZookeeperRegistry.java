@@ -65,8 +65,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
         if (!group.startsWith(Constants.PATH_SEPARATOR)) {
             group = Constants.PATH_SEPARATOR + group;
         }
-        this.root = group;//todo ericliu用于写到zookeeper中时候的前缀，默认是/dubbo
-        zkClient = zookeeperTransporter.connect(url);
+        this.root = group;
+        zkClient = zookeeperTransporter.connect(url);//todo ericliu 链接zookeeper默认调用ZkclientZookeeperClient
+        //todo ericliu 增加状态监听类-->添加到AbstractZookeeperClient定义的stateListeners中，
+        //todo ericliu 在ZkclientZookeeperClient中构造方法add了zookeeper自己的listener-->StateListener.stateChanged
         zkClient.addStateListener(new StateListener() {
             public void stateChanged(int state) {
                 if (state == RECONNECTED) {
@@ -107,7 +109,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     protected void doRegister(URL url) {
         try {
-            //todo ericliu zookeeper的协议（path）： /<group默认是dubbo>/<servicename默认是接口类型>/<category默认是providers>/<URL.encode(url.toFullString())> ,<dynamic默认是true>
             zkClient.create(toUrlPath(url), url.getParameter(Constants.DYNAMIC_KEY, true));
         } catch (Throwable e) {
             throw new RpcException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);

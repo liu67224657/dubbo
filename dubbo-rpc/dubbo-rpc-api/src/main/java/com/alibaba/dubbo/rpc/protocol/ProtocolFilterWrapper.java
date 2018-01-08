@@ -43,13 +43,20 @@ public class ProtocolFilterWrapper implements Protocol {
         this.protocol = protocol;
     }
 
+    //todo ericliu 调用Filter的逻辑
     private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;
+        //todo ericliu 加载filter
         List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
         if (filters.size() > 0) {
-            for (int i = filters.size() - 1; i >= 0; i--) {
+            for (int i = filters.size() - 1; i >= 0; i--) {//todo ericliu 倒叙遍历filter
+
+                //todo ericliu **关键代码 过滤器链模式，
+                //todo ericliu 层层的wrap主要逻辑如下：
                 final Filter filter = filters.get(i);
+                //todo ericliu 1、next=last（初始是参数invoker），之后为上一次循环中new出来的匿名接口实现Invoker类
                 final Invoker<T> next = last;
+                //todo ericiu 2、new一个匿名Invoker实现类
                 last = new Invoker<T>() {
 
                     public Class<T> getInterface() {
@@ -65,7 +72,7 @@ public class ProtocolFilterWrapper implements Protocol {
                     }
 
                     public Result invoke(Invocation invocation) throws RpcException {
-                        return filter.invoke(next, invocation);
+                        return filter.invoke(next, invocation);//todo ericliu 3、**关键代码 将上一次的invoker传到filter里，在filter里做invker.invoke(invocation)
                     }
 
                     public void destroy() {
@@ -87,9 +94,12 @@ public class ProtocolFilterWrapper implements Protocol {
     }
 
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+        //todo eriliu 是registryprotocol的协议
         if (Constants.REGISTRY_PROTOCOL.equals(invoker.getUrl().getProtocol())) {
             return protocol.export(invoker);
         }
+
+        //todo eriliu 不是registryprotocol的协议
         return protocol.export(buildInvokerChain(invoker, Constants.SERVICE_FILTER_KEY, Constants.PROVIDER));
     }
 

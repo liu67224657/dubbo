@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * NettyHandler
+ * NettyHandler 继承自netty的SimpleChannelHandler。维护了一个channel列表
  */
 @Sharable
 public class NettyHandler extends SimpleChannelHandler {
